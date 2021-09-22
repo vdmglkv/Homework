@@ -1,27 +1,41 @@
-"""Task 4.4 Implement a function split_by_index(s: str, indexes: List[int]) -> List[str] which splits the s string by
-indexes specified in indexes. Wrong indexes must be ignored. Examples:
+""""### Task 4.4
+Look through file `modules/legb.py`.
 
-split_by_index("python is cool, isn't it?", [6, 8, 12, 13, 18])
-["python", "is", "cool", ",", "isn't", "it?"]
+1) Find a way to call `inner_function` without moving it from inside of `enclosed_function`.
 
-split_by_index("no luck", [42])
-["no luck"]
+2.1) Modify ONE LINE in `inner_function` to make it print variable 'a' from global scope.
+
+2.2) Modify ONE LINE in `inner_function` to make it print variable 'a' form enclosing function.
 """
 
-string = "python is cool, isn't it?"
-indexes = [6, 8, 12, 13, 18]
+a = "I am global variable!"
 
 
-def split_by_index(s, ind):
-    s = s.replace(' ', '')
-    result = []
-    start = 0
-    for ind in indexes:
-        result.append(s[start:ind])
-        start = ind
-    if s[ind:]:
-        result.append(s[ind:])
-    return result
+# 1) Find a way to call `inner_function` without moving it from inside of `enclosed_function`.
+def enclosing_function_1():
+    a = "I am variable from enclosed function!"
+
+    def inner_function():
+        a = "I am local variable!"
+        print(a)
+    return inner_function
 
 
-print(split_by_index(string, indexes))
+# 2) Modify ONE LINE in inner_function to make it print variable 'a' from global scope.
+def enclosing_function_2():
+    a = "I am variable from enclosed function!"
+
+    def inner_function():
+        global a
+        print(a)
+    return inner_function
+
+
+# 3) Modify ONE LINE in inner_function to make it print variable 'a' form enclosing function.
+def enclosing_function_3():
+    a = "I am variable from enclosed function!"
+
+    def inner_function():
+        nonlocal a
+        print(a)
+    return inner_function

@@ -1,20 +1,19 @@
-"""Task 4.1
-Implement a function which receives a string and replaces all " symbols with ' and vise versa.
+"""Task 4.1 Open file `data/unsorted_names.txt` in data folder. Sort the names and write them to a new file called
+`sorted_names.txt`. Each name should start with a new line as in the following example:
+
+```
+Adele
+Adrienne
+...
+Willodean
+Xavier
+```
 """
 
-string = "Tes't' st'r'ing"
+with open("data/unsorted_names.txt", 'r') as file:
+    data = sorted(file.readlines())
 
+with open("sorted_names.txt", 'w') as file:
+    for inf in data:
+        file.write(inf)
 
-def string_replace(s):
-    result = ""
-    for char in s:
-        if char == "'":
-            result += '"'
-        elif char == '"':
-            result += "'"
-        else:
-            result += char
-    return result
-
-
-print(string_replace(string))
