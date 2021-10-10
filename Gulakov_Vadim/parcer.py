@@ -2,7 +2,7 @@ from bs4 import BeautifulSoup
 from console_args import args
 # from colorama import Fore
 import requests
-
+import sys
 
 HEADERS = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 '
@@ -24,8 +24,9 @@ class News:
         print(f'Data: {self.published}')
         print(f'Link: {self.link}')
         print()
+        print('Text:')
         print(self.text)
-        print(f'Url: {self.url}')
+        print(f'Image: {self.url}')
 
 
 class ParserRSS:
@@ -57,9 +58,13 @@ class ParserRSS:
         return text
 
     def get_page_title(self):
-        data = self.parse(self.link, tag='channel')
-        for inf in data:
-            return inf.find('title').text
+        try:
+            data = self.parse(self.link, tag='channel')
+            for inf in data:
+                return inf.find('title').text
+        except TypeError as ex:
+            print(f'[INFO] Invalid url!')
+            sys.exit()
 
     def get_news(self):
 
@@ -88,18 +93,34 @@ class ParserRSS:
         return articles_list
 
 
+def main():
+    try:
+
+        if args.source is not None:
+
+            if '--version' in sys.argv:
+                print(f'[INFO] Version: {args.version}')
+
+            print('[INFO] Starting scraping')
+            pars = ParserRSS(args.source)
+            print(f'Feed: {pars.get_page_title()}')
+            newses = pars.get_news()
+
+            for news in newses[:args.limit]:
+                print('=' * 200)
+                news.get_info()
+                print('=' * 200)
+
+            print('[INFO] Finished scraping')
+        elif args.source is None and '--version' in sys.argv:
+            print(f'[INFO] Version: {args.version}')
+        else:
+            print('[INFO] Link input expected!')
+
+    except KeyboardInterrupt:
+        print()
+        print('[INFO] Stopped by console!')
+
+
 if __name__ == '__main__':
-
-    if args.source is not None:
-        
-        print('[INFO] Starting scraping')
-        pars = ParserRSS(args.source)
-        print(f'Feed: {pars.get_page_title()}')
-        newses = pars.get_news()
-
-        for news in newses[:args.limit]:
-            print('=' * 200)
-            news.get_info()
-            print('=' * 200)
-
-        print('[INFO] Finished scraping')
+    main()
