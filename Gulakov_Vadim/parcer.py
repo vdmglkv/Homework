@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from console_args import args
 # from colorama import Fore
 import requests
+import re
 import sys
 
 HEADERS = {
@@ -62,7 +63,7 @@ class ParserRSS:
             data = self.parse(self.link, tag='channel')
             for inf in data:
                 return inf.find('title').text
-        except TypeError as ex:
+        except TypeError:
             print(f'[INFO] Invalid url!')
             sys.exit()
 
@@ -71,16 +72,19 @@ class ParserRSS:
         articles_list = []
         articles = self.parse(args.source)
 
-        for a in articles:
-            title = a.find('title').text
-            link = a.find('link').text
-            published = a.find('pubDate').text
-            media_content = str(a.find('media:content')).split('\"')
+        if args.limit > len(articles):
+            args.limit = len(articles)
 
-            text = self.get_news_text(link)
+        try:
+            for a in articles[:args.limit + 1]:
+                title = a.find('title').text
+                link = a.find('link').text
+                published = a.find('pubDate').text
+                media = re.findall(r'media:.[^ ]+', str(a))[0]
+                url = a.find(media)['url']
 
-            if 'None' not in media_content:
-                url = media_content[3]
+                text = self.get_news_text(link)
+
                 article = {
                     'title': title,
                     'link': link,
@@ -90,6 +94,8 @@ class ParserRSS:
                 }
                 news = News(**article)
                 articles_list.append(news)
+        except KeyError:
+            pass
         return articles_list
 
 
@@ -106,10 +112,9 @@ def main():
             print(f'Feed: {pars.get_page_title()}')
             newses = pars.get_news()
 
-            for news in newses[:args.limit]:
-                print('=' * 200)
+            for news in newses:
+                print('=' * 300)
                 news.get_info()
-                print('=' * 200)
 
             print('[INFO] Finished scraping')
         elif args.source is None and '--version' in sys.argv:
