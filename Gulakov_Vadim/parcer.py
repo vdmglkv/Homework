@@ -1,3 +1,5 @@
+import json
+from pprint import pprint
 from bs4 import BeautifulSoup
 from console_args import args
 # from colorama import Fore
@@ -44,10 +46,20 @@ class ParserRSS:
             soup = BeautifulSoup(response.content, parser_type)
             data = soup.find_all(tag, attrs={'class': class_})
             return data
-
         except Exception as e:
             print('[INFO] The scraping job failed. See exception: ')
             print(e)
+
+    # Переделать!
+    @staticmethod
+    def delete_substring(string: str):
+        pattern = r'\<(/?[^>]+)>'
+        # pattern = r'<\/*[a-z =":-]*>'
+        # pattern = r'<\/*[\/\.? _=":-]*>|<[\/\.?a-zA-Z _=":-]*>$'
+        string = re.sub(pattern, '', string)
+        # for char in match:
+        #     string = string.replace(char, '')
+        return string
 
     def get_news_text(self, link):
         text = ''
@@ -55,8 +67,50 @@ class ParserRSS:
 
         for p in data[:3]:
             text += str(p)[3:len(p) - 5] + '\n'
+            # text += str(p)
 
         return text
+
+    def get_news(self):
+        try:
+
+            articles_list = []
+            json_format = []
+            articles = self.parse(args.source)
+
+            if args.limit > len(articles):
+                args.limit = len(articles)
+
+            try:
+                for a in articles[:args.limit]:
+                    title = a.find('title').text
+                    link = a.find('link').text
+                    published = a.find('pubDate').text
+                    media = re.findall(r'media:.[^ ]+', str(a))[0]
+                    url = a.find(media)['url']
+
+                    text = self.get_news_text(link)
+
+                    article = {
+                        'title': title,
+                        'link': link,
+                        'published': published,
+                        'text': text,
+                        'url': url
+                    }
+
+                    if args.json:
+                        json_format.append(json.dumps(article))
+                    else:
+                        news = News(**article)
+                        articles_list.append(news)
+            except KeyError:
+                pass
+            if args.json:
+                return json_format
+            return articles_list
+        except TypeError:
+            sys.exit()
 
     def get_page_title(self):
         try:
@@ -67,37 +121,6 @@ class ParserRSS:
             print(f'[INFO] Invalid url!')
             sys.exit()
 
-    def get_news(self):
-
-        articles_list = []
-        articles = self.parse(args.source)
-
-        if args.limit > len(articles):
-            args.limit = len(articles)
-
-        try:
-            for a in articles[:args.limit + 1]:
-                title = a.find('title').text
-                link = a.find('link').text
-                published = a.find('pubDate').text
-                media = re.findall(r'media:.[^ ]+', str(a))[0]
-                url = a.find(media)['url']
-
-                text = self.get_news_text(link)
-
-                article = {
-                    'title': title,
-                    'link': link,
-                    'published': published,
-                    'text': text,
-                    'url': url
-                }
-                news = News(**article)
-                articles_list.append(news)
-        except KeyError:
-            pass
-        return articles_list
-
 
 def main():
     try:
@@ -106,15 +129,17 @@ def main():
 
             if '--version' in sys.argv:
                 print(f'[INFO] Version: {args.version}')
-
-            print('[INFO] Starting scraping')
             pars = ParserRSS(args.source)
-            print(f'Feed: {pars.get_page_title()}')
             newses = pars.get_news()
-
-            for news in newses:
-                print('=' * 300)
-                news.get_info()
+            print('[INFO] Starting scraping')
+            print(f'Feed: {pars.get_page_title()}')
+            if '--json' in sys.argv:
+                for news in newses:
+                    pprint(json.loads(news))
+            else:
+                for news in newses:
+                    print('=' * 200)
+                    news.get_info()
 
             print('[INFO] Finished scraping')
         elif args.source is None and '--version' in sys.argv:
