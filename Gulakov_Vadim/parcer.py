@@ -50,15 +50,10 @@ class ParserRSS:
             print('[INFO] The scraping job failed. See exception: ')
             print(e)
 
-    # Переделать!
     @staticmethod
-    def delete_substring(string: str):
-        pattern = r'\<(/?[^>]+)>'
-        # pattern = r'<\/*[a-z =":-]*>'
-        # pattern = r'<\/*[\/\.? _=":-]*>|<[\/\.?a-zA-Z _=":-]*>$'
+    def delete_html_tags_from_string(string: str):
+        pattern = r'<[^>]+>|<[^>]+'
         string = re.sub(pattern, '', string)
-        # for char in match:
-        #     string = string.replace(char, '')
         return string
 
     def get_news_text(self, link):
@@ -66,10 +61,9 @@ class ParserRSS:
         data = self.parse(link, tag='p', parser_type='html.parser')
 
         for p in data[:3]:
-            text += str(p)[3:len(p) - 5] + '\n'
-            # text += str(p)
+            text += str(p) + '\n'
 
-        return text
+        return self.delete_html_tags_from_string(text)
 
     def get_news(self):
         try:
