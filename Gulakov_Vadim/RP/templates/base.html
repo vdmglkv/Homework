@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <link rel="stylesheet" type="text/css" href="css/base.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Newses from {{page_title}}</title>
+</head>
+<body>
+    <table>
+        <tr>
+          <th>Title</th>
+          <th>Link</th>
+          <th>Published</th>
+          <th>Url</th>
+          </tr>
+        {% for i in range(news|length)%}
+         <tr>
+          <td>{{news[i].__dict__['title']}}</td>
+          <td><a href="{{news[i].__dict__['link']}}">On site</a></td>
+          <td>{{news[i].__dict__['published']}}</td>
+             {% if news[i].__dict__['url'] == None %}
+          <td>No image in news</td>
+             {% else %}
+             <td><a href="{{news[i].__dict__['url']}}">Image</a></td>
+             {% endif %}
+         </tr>
+         {% endfor %}
+</table>
+
+
+</body>
+</html>

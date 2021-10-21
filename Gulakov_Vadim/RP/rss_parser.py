@@ -1,13 +1,14 @@
 import json
 from pprint import pprint
 from bs4 import BeautifulSoup
+from converter import *
 from console_args import args
 import logging
-
-# from colorama import Fore
+import RP
 import requests
 import re
 import sys
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -34,6 +35,9 @@ class News:
         print('Text:')
         print(self.text)
         print(f'Image: {self.url}')
+
+    def getter(self):
+        return [i for i in dir(News)]
 
 
 class ParserRSS:
@@ -62,7 +66,7 @@ class ParserRSS:
         string = re.sub(pattern, '', string)
         return string
 
-    def get_news_text(self, link):
+    def get_news_text(self, link: str):
         text = ''
         data = self.parse(link, tag='p', parser_type='html.parser')
 
@@ -87,7 +91,10 @@ class ParserRSS:
                     link = a.find('link').text
                     published = a.find('pubDate').text
                     media = re.findall(r'media:.[^ ]+', str(a))[0]
-                    url = a.find(media)['url']
+                    try:
+                        url = a.find(media)['url']
+                    except KeyError:
+                        url = None
 
                     text = self.get_news_text(link)
                     article = {
@@ -105,11 +112,11 @@ class ParserRSS:
                         articles_list.append(news)
             except KeyError as e:
                 logging.error(e)
-                pass
             if args.json:
                 return json_format
             return articles_list
         except TypeError as e:
+            print(e)
             logging.error(e)
             sys.exit()
 
@@ -125,24 +132,39 @@ class ParserRSS:
 
 
 def main():
-    if args.verbose:
 
-        logging.basicConfig(level=logging.INFO,
-                            format='[%(asctime)s | %(levelname)s]: %(message)s',
-                            datefmt='%m.%d.%Y %H:%M:%S')
+    if args.version:
+        print(f'Version: {RP.__version__}')
 
     try:
 
         if args.source is not None:
-            logging.info("Program started")
-            if '--version' in sys.argv:
-                print(f'[INFO] Version: {args.version}')
-                logging.info(f"Program Version: {args.version}")
+
             pars = ParserRSS(args.source)
             newses = pars.get_news()
+            title = pars.get_page_title()
+
+            if args.verbose:
+
+                logging.basicConfig(level=logging.INFO,
+                                    format='[%(asctime)s | %(levelname)s]: %(message)s',
+                                    datefmt='%m.%d.%Y %H:%M:%S')
+            if args.html:
+                logging.info(f'Creating html document with newses in {os.getcwd()}')
+                try:
+                    create_html(title, newses)
+                except Exception as ex:
+                    print(ex)
+
+                sys.exit()
+
+            if args.pdf:
+                pass
+
+            logging.info("Program started")
             print('[INFO] Starting scraping')
             logging.info('Get page title')
-            print(f'Feed: {pars.get_page_title()}')
+            print(f'Feed: {title}')
             if '--json' in sys.argv:
                 logging.info('Return news in json format')
                 for news in newses:
@@ -156,11 +178,7 @@ def main():
             print('[INFO] Finished scraping')
             logging.info('Program finished')
             logging.debug("Program finished")
-        elif args.source is None and '--version' in sys.argv:
-
-            print(f'[INFO] Version: {args.version}')
-            logging.info(f"Program Version: {args.version}")
-        else:
+        elif args.source is None and not args.version:
             print('[INFO] Link input expected!')
 
     except KeyboardInterrupt as e:
