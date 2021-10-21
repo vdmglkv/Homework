@@ -1,6 +1,7 @@
 import json
 from pprint import pprint
 from bs4 import BeautifulSoup
+from bs4.element import ResultSet
 from converter import *
 from console_args import args
 import logging
@@ -36,9 +37,6 @@ class News:
         print(self.text)
         print(f'Image: {self.url}')
 
-    def getter(self):
-        return [i for i in dir(News)]
-
 
 class ParserRSS:
 
@@ -47,7 +45,7 @@ class ParserRSS:
         self.session = requests.Session()
         self.link = rss_url
 
-    def parse(self, link, parser_type: str = 'xml', tag: str = 'item', class_: str = ''):
+    def parse(self, link, parser_type: str = 'xml', tag: str = 'item', class_: str = '') -> ResultSet:
 
         try:
             response = self.session.get(link, headers=HEADERS)
@@ -61,12 +59,12 @@ class ParserRSS:
             print(e)
 
     @staticmethod
-    def delete_html_tags_from_string(string: str):
+    def delete_html_tags_from_string(string: str) -> str:
         pattern = r'<[^>]+>|<[^>]+'
         string = re.sub(pattern, '', string)
         return string
 
-    def get_news_text(self, link: str):
+    def get_news_text(self, link: str) -> str:
         text = ''
         data = self.parse(link, tag='p', parser_type='html.parser')
 
@@ -75,7 +73,7 @@ class ParserRSS:
 
         return self.delete_html_tags_from_string(text)
 
-    def get_news(self):
+    def get_news(self) -> list:
         try:
 
             articles_list = []
@@ -120,7 +118,7 @@ class ParserRSS:
             logging.error(e)
             sys.exit()
 
-    def get_page_title(self):
+    def get_page_title(self) -> str:
         try:
             data = self.parse(self.link, tag='channel')
             for inf in data:
