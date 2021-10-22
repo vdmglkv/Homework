@@ -148,9 +148,9 @@ def main():
                                     format='[%(asctime)s | %(levelname)s]: %(message)s',
                                     datefmt='%m.%d.%Y %H:%M:%S')
             if args.html:
-                logging.info(f'Creating html document with newses in {os.getcwd()}')
+                logging.info('Creating html document with newses...')
                 try:
-                    create_html(title, newses)
+                    create_html(args.html, title, newses)
                 except Exception as ex:
                     print(ex)
 
