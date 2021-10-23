@@ -76,7 +76,6 @@ class ParserRSS:
         try:
 
             articles_list = []
-            json_format = []
             articles = self.parse(args.source)
 
             if args.limit > len(articles):
@@ -101,16 +100,15 @@ class ParserRSS:
                         'text': text,
                         'url': url
                     }
-
-                    if args.json:
-                        json_format.append(json.dumps(article))
-                    else:
-                        news = News(**article)
-                        articles_list.append(news)
+                    articles_list.append(article)
+                    # if args.json:
+                    #     json_format.append(json.dumps(article))
+                    # else:
+                    #     news = News(**article)
+                    #     articles_list.append(news)
             except KeyError as e:
                 logging.error(e)
-            if args.json:
-                return json_format
+
             return articles_list
         except TypeError as e:
             print(e)
@@ -129,7 +127,6 @@ class ParserRSS:
 
 
 def main():
-
     if args.limit <= 0:
         args.limit = 1
 
@@ -140,47 +137,50 @@ def main():
 
         if args.source is not None:
 
-            pars = ParserRSS(args.source)
-            newses = pars.get_news()
-            title = pars.get_page_title()
-
             if args.verbose:
-
                 logging.basicConfig(level=logging.INFO,
                                     format='[%(asctime)s | %(levelname)s]: %(message)s',
                                     datefmt='%m.%d.%Y %H:%M:%S')
+            logging.info('Program started')
+            pars = ParserRSS(args.source)
+            newses = pars.get_news()
+            title = pars.get_page_title()
+            logging.info('Get page title')
+            print(f'Feed: {title}')
+
             if args.html:
                 logging.info('Creating html document with newses...')
+                newses_ = [News(**art) for art in newses]
                 try:
-                    create_html(args.html, title, newses)
+                    create_html(args.html, title, newses_)
                 except Exception as ex:
+                    logging.error(ex)
                     print(ex)
-
-                sys.exit()
+                if not args.pdf:
+                    sys.exit()
 
             if args.pdf:
                 logging.info('Creating pdf document with newses...')
+                newses_ = [News(**art) for art in newses]
                 try:
-                    create_pdf(args.pdf, title, newses)
+                    create_pdf(args.pdf, title, newses_)
                 except Exception as ex:
+                    logging.error(ex)
                     print(ex)
-                sys.exit()
+                if not args.json:
+                    sys.exit()
 
-
-
-            logging.info("Program started")
-            print('[INFO] Starting scraping')
-            logging.info('Get page title')
-            print(f'Feed: {title}')
-            if '--json' in sys.argv:
+            if args.json:
                 logging.info('Return news in json format')
                 for news in newses:
-                    pprint(json.loads(news))
-            else:
-                for news in newses:
-                    logging.info('Print news')
-                    print('=' * 200)
-                    news.get_info()
+                    news_ = json.dumps(news)
+                    pprint(json.loads(news_))
+                sys.exit()
+            for news in newses:
+                news_ = News(**news)
+                logging.info('Print news')
+                print('=' * 200)
+                news_.get_info()
 
             print('[INFO] Finished scraping')
             logging.info('Program finished')

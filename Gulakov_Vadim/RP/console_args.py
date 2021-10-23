@@ -10,7 +10,7 @@ parser.add_argument('source',
                     type=str,
                     help='RSS URL')
 parser.add_argument('--version', nargs='?', const=True, default=False, type=str, help='Print version info')
-parser.add_argument("--html", nargs='?', const=os.path.join(os.getcwd(), 'templates'),
+parser.add_argument("--html", nargs='?', const=os.getcwd(),
                     type=str,
                     help="Convert rss feed into html and "
                          "save as file")

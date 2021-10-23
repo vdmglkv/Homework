@@ -60,8 +60,10 @@ def create_pdf(path: str, page_title: str, newses: list):
     pdf.set_font('Times', '', 12)
 
     for i in range(len(newses)):
-        title = newses[i].__dict__['title']
-        link = newses[i].__dict__['link']
+        title = newses[i].__dict__['title'].encode('latin-1', 'replace').decode('latin-1')
+        if len(title) > 100:
+            title = title[:100] + '...'
+        link = newses[i].__dict__['link'].encode('latin-1', 'replace').decode('latin-1')
         text = newses[i].__dict__['text'].encode('latin-1', 'replace').decode('latin-1').replace('?', '')
 
         pdf.cell(pdf.set_center_for_string(title), 10, txt='Title: ' + title, ln=1, align='C')
