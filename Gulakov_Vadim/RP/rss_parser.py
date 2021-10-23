@@ -2,14 +2,13 @@ import json
 from pprint import pprint
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
-from converter import *
+from converter import create_html, create_pdf
 from console_args import args
 import logging
 import RP
 import requests
 import re
 import sys
-import os
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +130,9 @@ class ParserRSS:
 
 def main():
 
+    if args.limit <= 0:
+        args.limit = 1
+
     if args.version:
         print(f'Version: {RP.__version__}')
 
@@ -157,7 +159,14 @@ def main():
                 sys.exit()
 
             if args.pdf:
-                pass
+                logging.info('Creating pdf document with newses...')
+                try:
+                    create_pdf(args.pdf, title, newses)
+                except Exception as ex:
+                    print(ex)
+                sys.exit()
+
+
 
             logging.info("Program started")
             print('[INFO] Starting scraping')

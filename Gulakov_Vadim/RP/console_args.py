@@ -14,8 +14,8 @@ parser.add_argument("--html", nargs='?', const=os.path.join(os.getcwd(), 'templa
                     type=str,
                     help="Convert rss feed into html and "
                          "save as file")
-parser.add_argument("--pdf", nargs='?', const=True, default=False, type=str, help="Convert rss feed into pdf and save "
-                                                                                  "as file")
+parser.add_argument("--pdf", nargs='?', const=os.getcwd(), type=str, help="Convert rss feed into pdf and save "
+                                                                          "as file")
 parser.add_argument('--date', nargs='?', type=str, help='Return newses for that day')
 parser.add_argument('--json', nargs='?', const=True, default=False, type=bool, help='Print result as JSON in stdout')
 parser.add_argument('--verbose', nargs='?', const=True, default=False, type=bool, help='Outputs verbose status messages'

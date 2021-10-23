@@ -2,74 +2,83 @@
 <html lang="en">
 <head>
     <style type="text/css">
-	table {
-    font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif, sans-serif;
-    font-size: 14px;
-    border-radius: 10px;
-    border-spacing: 0;
-    text-align: center;
-}
-th {
-    background: #BCEBDD;
-    color: white;
-    text-shadow: 0 1px 1px #2D2020;
-    padding: 10px 20px;
-}
-th, td {
-    border-style: solid;
-    border-width: 0 1px 1px 0;
-    border-color: white;
-}
-th:first-child, td:first-child {
-    text-align: left;
-}
-th:first-child {
-    border-top-left-radius: 10px;
-}
-th:last-child {
-    border-top-right-radius: 10px;
-    border-right: none;
-}
-td {
-    padding: 10px 20px;
-    background: #F8E391;
-}
-tr:last-child td:first-child {
-    border-radius: 0 0 0 10px;
-}
-tr:last-child td:last-child {
-    border-radius: 0 0 10px 0;
-}
-tr td:last-child {
-    border-right: none;
-}
-</style>
+        table {
+            font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif, sans-serif;
+            font-size: 14px;
+            border-radius: 10px;
+            border-spacing: 0;
+            text-align: center;
+        }
+
+        th {
+            background: #BCEBDD;
+            color: white;
+            text-shadow: 0 1px 1px #2D2020;
+            padding: 10px 20px;
+        }
+
+        th, td {
+            border-style: solid;
+            border-width: 0 1px 1px 0;
+            border-color: white;
+        }
+
+        th:first-child, td:first-child {
+            text-align: left;
+        }
+
+        th:first-child {
+            border-top-left-radius: 10px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 10px;
+            border-right: none;
+        }
+
+        td {
+            padding: 10px 20px;
+            background: #F8E391;
+        }
+
+        tr:last-child td:first-child {
+            border-radius: 0 0 0 10px;
+        }
+
+        tr:last-child td:last-child {
+            border-radius: 0 0 10px 0;
+        }
+
+        tr td:last-child {
+            border-right: none;
+        }
+    </style>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+          name="viewport">
+    <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Newses from {{page_title}}</title>
 </head>
 <body>
-    <table>
-        <tr>
-          <th>Title</th>
-          <th>Link</th>
-          <th>Published</th>
-          <th>Url</th>
-          </tr>
-        {% for i in range(news|length)%}
-         <tr>
-          <td>{{news[i].__dict__['title']}}</td>
-          <td><a href="{{news[i].__dict__['link']}}">On site</a></td>
-          <td>{{news[i].__dict__['published']}}</td>
-             {% if news[i].__dict__['url'] == None %}
-          <td>No image in news</td>
-             {% else %}
-             <td><a href="{{news[i].__dict__['url']}}">Image</a></td>
-             {% endif %}
-         </tr>
-         {% endfor %}
+<table>
+    <tr>
+        <th>Title</th>
+        <th>Link</th>
+        <th>Published</th>
+        <th>Url</th>
+    </tr>
+    {% for i in range(news|length)%}
+    <tr>
+        <td>{{news[i].__dict__['title']}}</td>
+        <td><a href="{{news[i].__dict__['link']}}">On site</a></td>
+        <td>{{news[i].__dict__['published']}}</td>
+        {% if news[i].__dict__['url'] == None %}
+        <td>No image in news</td>
+        {% else %}
+        <td><a href="{{news[i].__dict__['url']}}">Image</a></td>
+        {% endif %}
+    </tr>
+    {% endfor %}
 </table>
 
 
