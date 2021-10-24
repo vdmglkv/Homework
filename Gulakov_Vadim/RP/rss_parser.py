@@ -1,9 +1,13 @@
 import json
+import os.path
+from datetime import datetime
 from pprint import pprint
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from converter import create_html, create_pdf
-from console_args import args
+from db import CACHE, create_table, clear_cache, store_data_in_cache, get_data
+from requests.exceptions import InvalidURL
+from console_args import args, parser
 import logging
 import RP
 import requests
@@ -58,6 +62,11 @@ class ParserRSS:
             soup = BeautifulSoup(response.content, parser_type)
             data = soup.find_all(tag, attrs={'class': class_})
             return data
+
+        except InvalidURL:
+            logging.error('Invalid url!')
+            print('[INFO] Invalid url!')
+            sys.exit()
 
         except Exception as e:
             print('[INFO] The scraping job failed. See exception: ')
@@ -136,29 +145,49 @@ class ParserRSS:
 
 
 def main():
+
+    if args.verbose:
+        logging.basicConfig(level=logging.INFO,
+                            format='[%(asctime)s | %(levelname)s]: %(message)s',
+                            datefmt='%m.%d.%Y %H:%M:%S')
+
+    logging.info('Program started')
     if args.limit <= 0:
         args.limit = 1
 
     if args.version:
         print(f'Version: {RP.__version__}')
 
+    if args.date is not None:
+        try:
+            datetime.strptime(args.date, "%Y%m%d")
+        except ValueError:
+            logging.error("Argument must be in YYYYMMDD format")
+            parser.error("argument --date must be formatted as YYYYMMDD")
+
     try:
 
         if args.source is not None:
 
-            if args.verbose:
-                logging.basicConfig(level=logging.INFO,
-                                    format='[%(asctime)s | %(levelname)s]: %(message)s',
-                                    datefmt='%m.%d.%Y %H:%M:%S')
-            logging.info('Program started')
+            if not os.path.exists(CACHE):
+                if not create_table():
+                    logging.info(f"Program finished! Can't create table in cache file {CACHE}")
+                    print("[INFO] Program finished!")
+                    sys.exit()
+
+            if args.clear:
+                clear_cache()
+                logging.info("Program finished! Cache cleared!")
+                sys.exit()
+
             pars = ParserRSS(args.source)
 
             logging.info('Check link')
             try:
                 if not pars.validate_rss_link():
                     print('We thinking that you have passed a link that is not an RSS feed. Do you want to continue?\n'
-                          'Press any symbols to continue or nothing to exit!('
-                          'warning: incorrect output is possible)')
+                          'Press any symbols to continue or nothing to exit('
+                          'warning: incorrect output is possible)!')
                     choice = input('>>> ')
                     if choice.strip() == '':
                         print('Run the parser again with the correct link!')
@@ -187,12 +216,12 @@ def main():
             if args.pdf:
                 logging.info('Creating pdf document with newses...')
                 newses_ = [News(**art) for art in newses]
-                try:
-                    create_pdf(title, newses_, args.pdf)
-                except Exception as ex:
-                    logging.error(ex)
-                    print('Something went wrong! '
-                          f'We are working on fixing this error!')
+                # try:
+                create_pdf(title, newses_, args.pdf)
+                # except Exception as ex:
+                #     logging.error(ex)
+                #     print('Something went wrong! '
+                #           f'We are working on fixing this error!')
                 if not args.json:
                     sys.exit()
 
