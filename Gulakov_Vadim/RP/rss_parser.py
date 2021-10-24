@@ -44,6 +44,13 @@ class ParserRSS:
         self.session = requests.Session()
         self.link = rss_url
 
+    def validate_rss_link(self):
+        pattern = ['rss', 'feed', 'xml']
+        for check in pattern:
+            if check in self.link:
+                return True
+        return False
+
     def parse(self, link, parser_type: str = 'xml', tag: str = 'item', class_: str = '') -> ResultSet:
 
         try:
@@ -67,8 +74,10 @@ class ParserRSS:
         text = ''
         data = self.parse(link, tag='p', parser_type='html.parser')
 
-        for p in data[:3]:
-            text += str(p) + '\n'
+        for p in data[:5]:
+            if 'cookie' in str(p):
+                continue
+            text += str(p).replace('\n', '') + '\n'
 
         return self.delete_html_tags_from_string(text)
 
@@ -86,7 +95,9 @@ class ParserRSS:
                     title = a.find('title').text
                     link = a.find('link').text
                     published = a.find('pubDate').text
-                    media = re.findall(r'media:.[^ ]+', str(a))[0]
+                    media = re.findall(r'media:.[^ ]+', str(a))
+                    if media:
+                        media = media[0]
                     try:
                         url = a.find(media)['url']
                     except KeyError:
@@ -101,11 +112,6 @@ class ParserRSS:
                         'url': url
                     }
                     articles_list.append(article)
-                    # if args.json:
-                    #     json_format.append(json.dumps(article))
-                    # else:
-                    #     news = News(**article)
-                    #     articles_list.append(news)
             except KeyError as e:
                 logging.error(e)
 
@@ -119,7 +125,10 @@ class ParserRSS:
         try:
             data = self.parse(self.link, tag='channel')
             for inf in data:
-                return inf.find('title').text
+                title = inf.find('title').text
+                if title is not None:
+                    return title
+                return self.link.split('/')[2]
         except TypeError as e:
             logging.error(e)
             print(f'[INFO] Invalid url!')
@@ -143,6 +152,22 @@ def main():
                                     datefmt='%m.%d.%Y %H:%M:%S')
             logging.info('Program started')
             pars = ParserRSS(args.source)
+
+            logging.info('Check link')
+            try:
+                if not pars.validate_rss_link():
+                    print('We thinking that you have passed a link that is not an RSS feed. Do you want to continue?\n'
+                          'Press any symbols to continue or nothing to exit!('
+                          'warning: incorrect output is possible)')
+                    choice = input('>>> ')
+                    if choice.strip() == '':
+                        print('Run the parser again with the correct link!')
+
+                        sys.exit()
+            except KeyboardInterrupt:
+                print('[INFO] Stopped by console!')
+                sys.exit()
+
             newses = pars.get_news()
             title = pars.get_page_title()
             logging.info('Get page title')
@@ -163,10 +188,11 @@ def main():
                 logging.info('Creating pdf document with newses...')
                 newses_ = [News(**art) for art in newses]
                 try:
-                    create_pdf(args.pdf, title, newses_)
+                    create_pdf(title, newses_, args.pdf)
                 except Exception as ex:
                     logging.error(ex)
-                    print(ex)
+                    print('Something went wrong! '
+                          f'We are working on fixing this error!')
                 if not args.json:
                     sys.exit()
 
@@ -192,6 +218,7 @@ def main():
         logging.error(e)
         print()
         print('[INFO] Stopped by console!')
+        sys.exit()
 
 
 if __name__ == '__main__':

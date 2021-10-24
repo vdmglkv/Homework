@@ -73,7 +73,7 @@
         <td><a href="{{news[i].__dict__['link']}}">On site</a></td>
         <td>{{news[i].__dict__['published']}}</td>
         {% if news[i].__dict__['url'] == None %}
-        <td>No image in news</td>
+        <td>No image in news or can't to parse it</td>
         {% else %}
         <td><a href="{{news[i].__dict__['url']}}">Image</a></td>
         {% endif %}

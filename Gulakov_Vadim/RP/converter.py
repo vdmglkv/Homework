@@ -13,15 +13,13 @@ class PDF(FPDF):
         self.title = title
 
     def header(self):
-
-        self.set_font('Arial', 'B', 15)
         w = self.get_string_width(self.title) + 6
         self.set_x((210 - w) / 2)
         self.set_draw_color(0, 80, 180)
         self.set_fill_color(230, 230, 0)
         self.set_text_color(220, 50, 50)
         self.set_line_width(1)
-        self.cell(w, 9, self.title, 1, 1, 'C', 1)
+        self.cell(w, 9, self.title.replace('?', ''), 1, 1, 'C', 1)
         self.ln(10)
 
     def footer(self):
@@ -53,18 +51,20 @@ def create_html(path: str, page_title: str, newses: list):
               f'Check your path!')
 
 
-def create_pdf(path: str, page_title: str, newses: list):
-    pdf = PDF(page_title)
+def create_pdf(page_title: str, newses: list, path: str = os.getcwd()):
+    font = os.path.join(os.path.dirname(__file__), "templates", "DejaVuSans.ttf")
+    pdf = PDF(page_title.encode('latin-1', 'replace').decode('latin-1'))
+    pdf.add_font('DejaVu', '', font, uni=True)
+    pdf.set_font('DejaVu', '', 12)
     pdf.alias_nb_pages()
     pdf.add_page()
-    pdf.set_font('Times', '', 12)
 
     for i in range(len(newses)):
-        title = newses[i].__dict__['title'].encode('latin-1', 'replace').decode('latin-1')
-        if len(title) > 100:
-            title = title[:100] + '...'
-        link = newses[i].__dict__['link'].encode('latin-1', 'replace').decode('latin-1')
-        text = newses[i].__dict__['text'].encode('latin-1', 'replace').decode('latin-1').replace('?', '')
+        title = newses[i].__dict__['title']
+        if len(title) > 50:
+            title = (title[:50] + '...')
+        link = newses[i].__dict__['link']
+        text = newses[i].__dict__['text']
 
         pdf.cell(pdf.set_center_for_string(title), 10, txt='Title: ' + title, ln=1, align='C')
 
