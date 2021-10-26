@@ -13,10 +13,11 @@ def create_table() -> bool:
             cur.execute('''CREATE TABLE IF NOT EXISTS news (
                         id INTEGER PRIMARY KEY AUTOINCREMENT,
                         channel TEXT,
+                        source_link TEXT,
                         title TEXT,
                         link TEXT,
                         pub_date TEXT,
-                        search_date DATE,
+                        date DATE,
                         url TEXT UNIQUE);''')
             cur.close()
 
@@ -28,40 +29,98 @@ def create_table() -> bool:
         return False
 
 
-def store_data_in_cache(data: dict):
+def store_data_in_cache(data: dict, source: str, channel: str):
     try:
         con = sql.connect(CACHE)
+        title = data['title']
+        link = data['link']
+        pubdate = data['published']
+        only_date = pubdate.split('T')[0]
+        url = data['url']
+
         with con:
             cur = con.cursor()
-            # cur.execute()
-            con.commit()
-            cur.close()
+            try:
+                # cur.execute(f'''INSERT INTO news(channel, title, link, pub_date, search_date, url)
+                #                             VALUES({channel}, {title}, {link}, {pubdate}, {search_date}, {url});''')
+                cur.execute('''INSERT INTO news(channel, source_link, title, link, pub_date, date, url)
+                            VALUES(?, ?, ?, ?, ?, ?, ?);''',
+                            (channel, source, title, link, pubdate, only_date, url))
+            except sql.IntegrityError:
+                cur.execute('''UPDATE news SET 
+                            title = ?,
+                            pub_date = ?,
+                            date = ?,
+                            url = ? WHERE
+                            link == ? AND (
+                            title <> ? OR
+                            pub_date <> ? OR
+                            url <> ?)''',
+                            (title, pubdate, only_date, url, link,
+                             title, pubdate, url))
+        con.commit()
 
     except sql.OperationalError:
         logging.error(f"Failed to store data in cache file {CACHE}")
         return False
 
 
-def get_data():
-    pass
+def get_data(date, source, limit):
+    try:
+        con = sql.connect(CACHE)
+        with con:
+            cur = con.cursor()
+        if limit is not None:
+            cur.execute('''SELECT * FROM news WHERE source_link LIKE ? AND STRFTIME('%Y%m%d', date)=?
+                        ORDER BY date DESC LIMIT ?;''', (source, date, limit))
+        else:
+            cur.execute('''SELECT * FROM news WHERE source_link LIKE ? AND STRFTIME('%Y%m%d', date)=?
+                        ORDER BY date DESC;''', (source, date))
+
+        newses = []
+        n = 0
+        logging.info("Starting retrieval of data from cache file")
+        for row in cur:
+            n += 1
+            logging.info(f"Processing news item #{n}")
+            news_dict = {"Channel": row[1],
+                         "Channel URL": row[2],
+                         "Title": row[3],
+                         "Link": row[4],
+                         "Date": row[5],
+                         "Image": row[7],
+                         }
+            newses.append(news_dict)
+            logging.info(f"News item #{n} added to dictionary")
+        con.close()
+        if newses:
+            if limit is not None and len(newses) < limit:
+                logging.warning(f"Limit set to {limit} but only {len(newses)} news found in cache")
+            logging.info(f"{len(newses)} news retrieved from cache")
+            return newses
+        else:
+            logging.error(f"No information found in cache for {date}")
+            return None
+
+    except sql.OperationalError as err:
+        logging.error(f"Unable to retrieve info from cache file '{CACHE}' - {err}")
 
 
 def clear_cache():
     logging.warning(f"User requested to clean cache file '{CACHE}'")
-    confirmation = input("Are you sure to clean all data from cache file? "
+    confirmation = input("Are you sure to clean all data from cache? "
                          "Press 'y' to confirm or any other key to cancel.\n")
     if confirmation.upper() == 'Y':
         try:
             con = sql.connect(CACHE)
             with con:
                 cur = con.cursor()
-                cur.execute("DELETE FROM news;")
+                cur.execute("DROP TABLE news;")
                 con.commit()
-                cur.execute("VACUUM;")
                 logging.info(f"Delete all data from {CACHE}")
 
         except sql.OperationalError as ex:
             logging.error(f"Unable to delete data from {CACHE} - {ex}")
     else:
-        logging.warning(f"Cleaning cache file '{CACHE}' cancelled")
-        print("Cleaning cache file cancelled")
+        logging.warning(f"Cleaning cache file '{CACHE}' cancelled!")
+        print("Cleaning cache file cancelled!")

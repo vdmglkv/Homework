@@ -161,6 +161,21 @@ def main():
     if args.date is not None:
         try:
             datetime.strptime(args.date, "%Y%m%d")
+            newses = get_data(args.date, args.source, args.limit)
+            if newses is not None:
+                print("[INFO] Loaded news from cache:")
+                for news in newses:
+                    print(f'Channel: {news["Channel"]}')
+                    print(f'Link: {news["Channel URL"]}')
+                    print(f'Title: {news["Title"]}')
+                    print(f'News link: {news["Link"]}')
+                    print(f'Date: {news["Date"]}')
+                    print(f'Image: {news["Image"]}')
+                    print('=' * 150)
+                sys.exit()
+            else:
+                print('No news in this day!')
+                sys.exit()
         except ValueError:
             logging.error("Argument must be in YYYYMMDD format")
             parser.error("argument --date must be formatted as YYYYMMDD")
@@ -174,6 +189,8 @@ def main():
                     logging.info(f"Program finished! Can't create table in cache file {CACHE}")
                     print("[INFO] Program finished!")
                     sys.exit()
+            else:
+                create_table()
 
             if args.clear:
                 clear_cache()
@@ -199,6 +216,8 @@ def main():
 
             newses = pars.get_news()
             title = pars.get_page_title()
+            for news in newses:
+                store_data_in_cache(news, args.source, title)
             logging.info('Get page title')
             print(f'Feed: {title}')
 
@@ -216,12 +235,12 @@ def main():
             if args.pdf:
                 logging.info('Creating pdf document with newses...')
                 newses_ = [News(**art) for art in newses]
-                # try:
-                create_pdf(title, newses_, args.pdf)
-                # except Exception as ex:
-                #     logging.error(ex)
-                #     print('Something went wrong! '
-                #           f'We are working on fixing this error!')
+                try:
+                    create_pdf(title, newses_, args.pdf)
+                except Exception as ex:
+                    logging.error(ex)
+                    print('Something went wrong! '
+                          f'We are working on fixing this error!')
                 if not args.json:
                     sys.exit()
 

@@ -1,4 +1,5 @@
 import argparse
+from datetime import date
 import os.path
 
 parser = argparse.ArgumentParser(description='Pure Python command-line RSS reader')
@@ -16,7 +17,9 @@ parser.add_argument("--html", nargs='?', const=os.getcwd(),
                          "save as file")
 parser.add_argument("--pdf", nargs='?', const=os.getcwd(), type=str, help="Convert rss feed into pdf and save "
                                                                           "as file")
-parser.add_argument('--date', nargs='?', type=str, help='Return newses for that day')
+parser.add_argument('--date', nargs='?', const=str(date.today().strftime("%Y%m%d")), type=str, help='Return newses '
+                                                                                                    'for that '
+                                                                                                    'day')
 parser.add_argument('--clear', nargs='?', const=True, default=False, type=bool, help='Clear newses cache')
 parser.add_argument('--json', nargs='?', const=True, default=False, type=bool, help='Print result as JSON in stdout')
 parser.add_argument('--verbose', nargs='?', const=True, default=False, type=bool, help='Outputs verbose status messages'
