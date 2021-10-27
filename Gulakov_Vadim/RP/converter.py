@@ -8,11 +8,38 @@ env = Environment(loader=FileSystemLoader('templates'))
 
 
 class PDF(FPDF):
-    def __init__(self, title: str):
+    """
+    Class PDF inherited from FPDF with overriding methods 'header' and 'footer'
+
+    Attributes
+    ----------
+    title : str
+        Source title
+
+    Methods
+    -------
+    header()
+        Overriding method from head of pdf file.
+    footer()
+        Overriding method from footer of pdf file.
+    set_center_for_string()
+        The method that centers string in pdf file and draw lines.
+
+    """
+    def __init__(self, title: str) -> None:
+        """
+        Constructor of PDF class.
+        :param title:
+        """
         super().__init__()
         self.title = title
 
-    def header(self):
+    def header(self) -> None:
+        """
+        Override method header that responsible for head of pdf file.
+
+        :return: None
+        """
         w = self.get_string_width(self.title) + 6
         self.set_x((210 - w) / 2)
         self.set_draw_color(0, 80, 180)
@@ -22,7 +49,12 @@ class PDF(FPDF):
         self.cell(w, 9, self.title.replace('?', ''), 1, 1, 'C', 1)
         self.ln(10)
 
-    def footer(self):
+    def footer(self) -> None:
+        """
+        Override method footer that responsible for footer of pdf file.
+
+        :return: None
+        """
 
         self.set_y(-15)
         self.set_font('Arial', 'I', 8)
@@ -30,6 +62,14 @@ class PDF(FPDF):
         self.cell(0, 10, 'Page ' + str(self.page_no()), 0, 0, 'C')
 
     def set_center_for_string(self, string: str) -> float:
+        """
+        The method that centers string in pdf file and draw lines.
+
+        :param string: str
+            String that need to centers
+        :return: float
+            Return the string's weight.
+        """
         w = self.get_string_width(string)
         self.set_x((210 - self.get_string_width(string)) / 2)
         self.set_line_width(1)
@@ -37,7 +77,18 @@ class PDF(FPDF):
         return w
 
 
-def create_html(path: str, page_title: str, newses: list):
+def create_html(path: str, page_title: str, newses: list) -> None:
+    """
+    The method that convert rss feed into html file and save them.
+
+    :param path: str
+        Path to save output file.
+    :param page_title: str
+        Page title of rss feed.
+    :param newses: list
+        List of news that will be write in html file.
+    :return: None
+    """
 
     template = env.get_template('base.html')
     path_to_save = os.path.normpath(os.path.join(path, 'newses.html'))
@@ -51,7 +102,18 @@ def create_html(path: str, page_title: str, newses: list):
               f'Check your path!')
 
 
-def create_pdf(page_title: str, newses: list, path: str = os.getcwd()):
+def create_pdf(page_title: str, newses: list, path: str = os.getcwd()) -> None:
+    """
+    The method that convert rss feed into html file and save them.
+
+    :param path: str
+        Path to save output file.
+    :param page_title: str
+        Page title of rss feed.
+    :param newses: list
+        List of news that will be write in pdf file.
+    :return: None
+    """
     font = os.path.join(os.path.dirname(__file__), "templates", "DejaVuSans.ttf")
     pdf = PDF(page_title.encode('latin-1', 'replace').decode('latin-1'))
     pdf.add_font('DejaVu', '', font, uni=True)

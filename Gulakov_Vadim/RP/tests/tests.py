@@ -4,6 +4,9 @@ from RP import console_args
 
 
 class TestParser(unittest.TestCase):
+    """
+
+    """
 
     def test_parse_args(self):
         """Test to assert that command-line input is parsed correctly."""

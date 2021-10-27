@@ -1,3 +1,6 @@
+"""
+
+"""
 import json
 import os.path
 from datetime import datetime
@@ -23,6 +26,27 @@ HEADERS = {
 
 
 class News:
+    """Class to save rss news.
+
+    Attributes
+    ----------
+    title : str
+        News title
+    link : str
+        News link
+    published : str
+        News publication date
+    text : str
+        News text
+    url : str
+        Url of news image
+
+    Methods
+    -------
+    get_info()
+        Return general information about news
+
+    """
 
     def __init__(self, title: str, link: str, published: str, text: str, url: str):
         self.title = title
@@ -32,6 +56,7 @@ class News:
         self.url = url
 
     def get_info(self):
+        """The method that get general information about news"""
         print(f'Title: {self.title}')
         print(f'Data: {self.published}')
         print(f'Link: {self.link}')
@@ -42,13 +67,53 @@ class News:
 
 
 class ParserRSS:
+    """General class
 
-    def __init__(self, rss_url: str):
+    Attributes
+    ----------
+    rss_url : str
+        Source link
+
+    Methods
+    -------
+    validate_rss_link()
+        The method that validate rss link.
+        :return: bool
+
+    parse()
+        The method that parse data from the different types of files.
+        :return: ResultSet
+            Return parse data.
+
+    delete_html_tags_from_string()
+        The method that delete html tags from news text.
+        :return: str
+
+    get_news_text()
+        The method that parse news text from current link.
+        :return: str
+
+    get_page_title()
+        The method that return page title.
+        :return: str
+    """
+
+    def __init__(self, rss_url: str) -> None:
+        """
+        Constructor of ParserRSS class
+        :param rss_url: str
+        """
 
         self.session = requests.Session()
         self.link = rss_url
 
-    def validate_rss_link(self):
+    def validate_rss_link(self) -> bool:
+
+        """
+        The method that checks that source link refers to rss.
+        :return:
+        """
+
         pattern = ['rss', 'feed', 'xml']
         for check in pattern:
             if check in self.link:
@@ -56,6 +121,14 @@ class ParserRSS:
         return False
 
     def parse(self, link, parser_type: str = 'xml', tag: str = 'item', class_: str = '') -> ResultSet:
+        """
+        The method that parse data from the current link.
+        :param link:
+        :param parser_type:
+        :param tag:
+        :param class_:
+        :return:
+        """
 
         try:
             response = self.session.get(link, headers=HEADERS)
@@ -75,11 +148,22 @@ class ParserRSS:
 
     @staticmethod
     def delete_html_tags_from_string(string: str) -> str:
+        """
+        The method that delete html tags from news text.
+
+        :param string:
+        :return:
+        """
         pattern = r'<[^>]+>|<[^>]+'
         string = re.sub(pattern, '', string)
         return string
 
     def get_news_text(self, link: str) -> str:
+        """
+        The method that get newness's text from their link.
+        :param link:
+        :return:
+        """
         text = ''
         data = self.parse(link, tag='p', parser_type='html.parser')
 
@@ -91,6 +175,11 @@ class ParserRSS:
         return self.delete_html_tags_from_string(text)
 
     def get_news(self) -> list:
+        """
+        The method that return a list of newses from feed.
+
+        :return:
+        """
         try:
 
             articles_list = []
@@ -131,6 +220,10 @@ class ParserRSS:
             sys.exit()
 
     def get_page_title(self) -> str:
+        """
+        The method that return RSS feed page title.
+        :return:
+        """
         try:
             data = self.parse(self.link, tag='channel')
             for inf in data:
@@ -144,7 +237,11 @@ class ParserRSS:
             sys.exit()
 
 
-def main():
+def main() -> None:
+    """
+    The main function that implement logic of all program.
+    :return: None
+    """
 
     if args.verbose:
         logging.basicConfig(level=logging.INFO,

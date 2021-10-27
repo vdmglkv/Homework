@@ -1,11 +1,17 @@
 import sqlite3 as sql
 import os.path
 import logging
+from typing import Union
 
 CACHE = os.path.join(os.path.dirname(__file__), "templates", "rss_cache.db")
 
 
 def create_table() -> bool:
+    """
+    The method that create local cache and table News in him.
+
+    :return: bool
+    """
     try:
         con = sql.connect(CACHE)
         with con:
@@ -29,7 +35,21 @@ def create_table() -> bool:
         return False
 
 
-def store_data_in_cache(data: dict, source: str, channel: str):
+def store_data_in_cache(data: dict, source: str, channel: str) -> bool:
+    """
+    The method that store news data in local cache.
+
+    :param data: dict
+        Dictionary of newses data.
+
+    :param source: str
+        Link of source rss feed.
+
+    :param channel: str
+        Channel title.
+
+    :return: bool
+    """
     try:
         con = sql.connect(CACHE)
         title = data['title']
@@ -65,7 +85,17 @@ def store_data_in_cache(data: dict, source: str, channel: str):
         return False
 
 
-def get_data(date, source, limit):
+def get_data(date: str, source: str, limit: int) -> Union[list, None]:
+    """
+    The method that load newses from local cache.
+    :param date: str
+        Publish news date
+    :param source: str
+        Link of source rss feed
+    :param limit: int
+        Limit news output
+    :return: Union[list, None]
+    """
     try:
         con = sql.connect(CACHE)
         with con:
@@ -106,7 +136,12 @@ def get_data(date, source, limit):
         logging.error(f"Unable to retrieve info from cache file '{CACHE}' - {err}")
 
 
-def clear_cache():
+def clear_cache() -> None:
+    """
+    The method that clear data from local cache.
+
+    :return: None
+    """
     logging.warning(f"User requested to clean cache file '{CACHE}'")
     confirmation = input("Are you sure to clean all data from cache? "
                          "Press 'y' to confirm or any other key to cancel.\n")
