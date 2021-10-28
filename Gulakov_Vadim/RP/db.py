@@ -3,7 +3,7 @@ import os.path
 import logging
 from typing import Union
 
-CACHE = os.path.join(os.path.dirname(__file__), "templates", "rss_cache.db")
+CACHE = os.path.join(os.path.dirname(__file__), "rss_cache.db")
 
 
 def create_table() -> bool:
@@ -79,10 +79,12 @@ def store_data_in_cache(data: dict, source: str, channel: str) -> bool:
                             (title, pubdate, only_date, url, link,
                              title, pubdate, url))
         con.commit()
-
-    except sql.OperationalError:
-        logging.error(f"Failed to store data in cache file {CACHE}")
+    except:
         return False
+
+    # except sql.OperationalError:
+    #     logging.error(f"Failed to store data in cache file {CACHE}")
+    #     return False
 
 
 def get_data(date: str, source: str, limit: int) -> Union[list, None]:

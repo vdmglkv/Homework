@@ -12,7 +12,6 @@ from db import CACHE, create_table, clear_cache, store_data_in_cache, get_data
 from requests.exceptions import InvalidURL
 from console_args import args, parser
 import logging
-import RP
 import requests
 import re
 import sys
@@ -48,7 +47,22 @@ class News:
 
     """
 
-    def __init__(self, title: str, link: str, published: str, text: str, url: str):
+    def __init__(self, title: str, link: str, published: str, text: str, url: str) -> None:
+        """
+        Constructor of News class.
+
+        :param title: str
+            News title
+        :param link: str
+            News link
+        :param published: str
+            Date of news publish
+        :param text: str
+            News text
+        :param url: str
+            Link for the news images
+        :return: None
+        """
         self.title = title
         self.link = link
         self.published = published
@@ -253,7 +267,7 @@ def main() -> None:
         args.limit = 1
 
     if args.version:
-        print(f'Version: {RP.__version__}')
+        print(f'Version: 4.0')
 
     if args.date is not None:
         try:

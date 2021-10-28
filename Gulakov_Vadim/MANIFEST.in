@@ -1,0 +1,2 @@
+include RP/templates/*.html
+include RP/templates/*.ttf

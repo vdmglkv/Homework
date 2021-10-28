@@ -1,6 +1,6 @@
 import unittest
-from datetime import date
-from RP import console_args
+# from RP.converter import create_html, create_pdf
+from Gulakov_Vadim.RP import console_args
 
 
 class TestParser(unittest.TestCase):
@@ -19,3 +19,14 @@ class TestParser(unittest.TestCase):
         self.assertIsNone(args.html)
         self.assertIsNone(args.pdf)
         self.assertEqual(args.source, "https://news.yahoo.com/rss/")
+
+    def test_create_table(self):
+        pass
+
+    def test_save_html_file(self):
+        pass
+
+    def test_save_pdf_file(self):
+        pass
+
+
