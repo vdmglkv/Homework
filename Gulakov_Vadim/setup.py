@@ -1,7 +1,10 @@
 import setuptools
 requirements = [
-    'jinja2',
-    'bs4',
+    'jinja2>=3.0.2',
+    'beautifulsoup4>=4.10.0',
+    'lxml>=4.6.3',
+    'requests>=2.26.0',
+    'fpdf>=1.7.2'
 ]
 # with open("requirements.txt") as f:
 #     requirements = f.read()
