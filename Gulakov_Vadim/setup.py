@@ -27,8 +27,8 @@ setuptools.setup(
     scripts=['RP/converter.py',
              'RP/console_args.py',
              'RP/db.py',
-             'RP/templates/base.html',
-             'RP/templates/DejaVuSans.ttf'],
+             'RP/templates/base.html'],
+             # 'RP/templates/DejaVuSans.ttf'],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

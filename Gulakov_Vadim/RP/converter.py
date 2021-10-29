@@ -1,10 +1,8 @@
 import logging
-from jinja2 import FileSystemLoader, Environment
+from jinja2 import FileSystemLoader, Environment, TemplateNotFound
 from fpdf import FPDF
 from console_args import args
 import os.path
-
-env = Environment(loader=FileSystemLoader('templates'))
 
 
 class PDF(FPDF):
@@ -89,8 +87,13 @@ def create_html(path: str, page_title: str, newses: list) -> None:
         List of news that will be write in html file.
     :return: None
     """
+    env = Environment(loader=FileSystemLoader('templates'))
+    try:
+        template = env.get_template('base.html')
+    except TemplateNotFound:
+        env = Environment(loader=FileSystemLoader(os.path.dirname(__file__)))
+        template = env.get_template('base.html')
 
-    template = env.get_template('base.html')
     path_to_save = os.path.normpath(os.path.join(path, 'newses.html'))
     try:
         logging.info(f'Try to save in {path_to_save}')
