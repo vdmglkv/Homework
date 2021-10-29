@@ -117,9 +117,16 @@ def create_pdf(page_title: str, newses: list, path: str = os.getcwd()) -> None:
         List of news that will be write in pdf file.
     :return: None
     """
+
     font = os.path.join(os.path.dirname(__file__), "templates", "DejaVuSans.ttf")
     pdf = PDF(page_title.encode('latin-1', 'replace').decode('latin-1'))
-    pdf.add_font('DejaVu', '', font, uni=True)
+    try:
+        pdf.add_font('DejaVu', '', font, uni=True)
+    except RuntimeError:
+        font = os.path.join(os.path.split(os.path.split(os.path.dirname(__file__))[0])[0], "RP", "templates",
+                            "DejaVuSans.ttf")
+        pdf.add_font('DejaVu', '', font, uni=True)
+
     pdf.set_font('DejaVu', '', 12)
     pdf.alias_nb_pages()
     pdf.add_page()
