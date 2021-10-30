@@ -1,3 +1,4 @@
+![python logo](RP/templates/Python_logo.jpg) 
 # Author
 Vadim Gulakov
 
