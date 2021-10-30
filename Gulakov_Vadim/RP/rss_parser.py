@@ -275,6 +275,12 @@ def main() -> None:
             newses = get_data(args.date, args.source, args.limit)
             if newses is not None:
                 print("[INFO] Loaded news from cache:")
+                if args.json:
+                    for news in newses:
+                        news_ = json.dumps(news)
+                        pprint(json.loads(news_))
+                    sys.exit()
+
                 for news in newses:
                     print(f'Channel: {news["Channel"]}')
                     print(f'Link: {news["Channel URL"]}')
