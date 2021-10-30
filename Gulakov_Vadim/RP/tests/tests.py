@@ -1,12 +1,11 @@
+import argparse
+import os
 import unittest
-# from RP.converter import create_html, create_pdf
-from Gulakov_Vadim.RP import console_args
+from RP import console_args, db
+from unittest.mock import patch
 
 
 class TestParser(unittest.TestCase):
-    """
-
-    """
 
     def test_parse_args(self):
         """Test to assert that command-line input is parsed correctly."""
@@ -21,12 +20,15 @@ class TestParser(unittest.TestCase):
         self.assertEqual(args.source, "https://news.yahoo.com/rss/")
 
     def test_create_table(self):
-        pass
+        self.assertTrue(db.create_table())
 
-    def test_save_html_file(self):
-        pass
+    @patch("logging.warning")
+    @patch("argparse.ArgumentParser.parse_args",
+           return_value=argparse.Namespace(clear=True))
+    def test_clear_cache(self, moack, moack2):
+        if os.path.exists(db.CACHE):
+            self.assertTrue(db.clear_cache())
 
-    def test_save_pdf_file(self):
-        pass
-
-
+    def test_get_data_from_cache(self):
+        args = console_args.args
+        self.assertIsNone(db.get_data(args.source, args.date, args.limit))

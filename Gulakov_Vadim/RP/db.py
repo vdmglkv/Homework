@@ -79,12 +79,11 @@ def store_data_in_cache(data: dict, source: str, channel: str) -> bool:
                             (title, pubdate, only_date, url, link,
                              title, pubdate, url))
         con.commit()
-    except:
-        return False
+        return True
 
-    # except sql.OperationalError:
-    #     logging.error(f"Failed to store data in cache file {CACHE}")
-    #     return False
+    except sql.OperationalError:
+        logging.error(f"Failed to store data in cache file {CACHE}")
+        return False
 
 
 def get_data(date: str, source: str, limit: int) -> Union[list, None]:
@@ -138,7 +137,7 @@ def get_data(date: str, source: str, limit: int) -> Union[list, None]:
         logging.error(f"Unable to retrieve info from cache file '{CACHE}' - {err}")
 
 
-def clear_cache() -> None:
+def clear_cache() -> bool:
     """
     The method that clear data from local cache.
 
@@ -155,6 +154,7 @@ def clear_cache() -> None:
                 cur.execute("DROP TABLE news;")
                 con.commit()
                 logging.info(f"Delete all data from {CACHE}")
+                return True
 
         except sql.OperationalError as ex:
             logging.error(f"Unable to delete data from {CACHE} - {ex}")
