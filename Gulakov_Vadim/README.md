@@ -51,8 +51,8 @@ CLI:
 
 ```
 $ rss_reader --help
-usage: rss_reader [-h] [--version] [--json] [--to-html FILE] [--to-pdf FILE]
-                  [--verbose] [--limit LIMIT] [--date DATE] [--colorize]
+usage: rss_reader [-h] [--version] [--json] [--html FILE] [--pdf FILE]
+                  [--verbose] [--limit LIMIT] [--date DATE]
                   [--clear]
                   source
                   
